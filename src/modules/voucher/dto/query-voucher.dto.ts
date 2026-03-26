@@ -1,9 +1,9 @@
 import { ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsBoolean, IsOptional, IsString } from 'class-validator';
-import { Prisma } from 'generated/prisma/browser';
 import { PaginateDto } from 'src/common/paginate.dto';
 import { getOrderBy } from 'src/common/sort-order';
+import { Prisma } from '../../../../generated/prisma/browser';
 
 export class QueryVoucherDto extends PartialType(PaginateDto) {
   @ApiPropertyOptional({ type: 'string' })

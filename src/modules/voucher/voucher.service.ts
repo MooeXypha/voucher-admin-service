@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, Voucher } from 'generated/prisma/client';
 import { GenerateVoucher } from 'src/common/utils/generate-voucher';
 import { PrismaService } from 'src/shared/prisma/prisma.service';
+import { Prisma, Voucher } from '../../../generated/prisma/client';
 import { CreateVoucherDto } from './dto/create-voucher.dto';
 import { QueryVoucherDto } from './dto/query-voucher.dto';
 import { UpdateVoucherDto } from './dto/update-voucher.dto';
