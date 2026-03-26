@@ -3,26 +3,25 @@
 import 'dotenv/config';
 import { defineConfig } from 'prisma/config';
 
-const databaseUrl =
-  process.env['DATABASE_URL'] ??
-  (() => {
-    const host = process.env['DATABASE_HOST'];
-    const port = process.env['DATABASE_PORT'] ?? '5432';
-    const name = process.env['DATABASE_NAME'];
-    const user = process.env['DATABASE_USER'];
-    const password = process.env['DATABASE_PASSWORD'];
+const databaseUrl = (() => {
+  const directUrl = process.env['DATABASE_URL'];
+  if (directUrl) return directUrl;
 
-    if (!host || !name || !user || !password) {
-      throw new Error(
-        'Missing database configuration. Set DATABASE_URL or DATABASE_HOST, DATABASE_PORT, DATABASE_NAME, DATABASE_USER, and DATABASE_PASSWORD.',
-      );
-    }
+  const host = process.env['DATABASE_HOST'];
+  const port = process.env['DATABASE_PORT'] ?? '5432';
+  const name = process.env['DATABASE_NAME'];
+  const user = process.env['DATABASE_USER'];
+  const password = process.env['DATABASE_PASSWORD'];
 
+  if (host && name && user && password) {
     const encodedUser = encodeURIComponent(user);
     const encodedPassword = encodeURIComponent(password);
-
     return `postgresql://${encodedUser}:${encodedPassword}@${host}:${port}/${name}`;
-  })();
+  }
+
+  // Fallback for build-time commands such as `prisma generate` when DB env vars are unavailable.
+  return 'postgresql://postgres:postgres@localhost:5432/postgres';
+})();
 
 export default defineConfig({
   schema: 'prisma/schema.prisma',
