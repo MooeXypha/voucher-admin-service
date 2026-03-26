@@ -1,0 +1,29 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Voucher {
+  id              Int       @id @default(autoincrement())
+  buyerName       String    @map("buyer_name") @db.VarChar(256)
+  buyerPhoneNo    String    @map("buyer_phone_no") @db.VarChar(256)
+  serviceType     String?   @map("service_type")
+  accountCategory String    @map("account_category")
+  accountUsername String?   @map("account_username")
+  amountPaid      String    @map("amount_paid")
+  prepaid         Boolean?  @default(false) @map("prepaid")
+  paymentMethod   String    @map("payment_method")
+  paymentDate     DateTime  @map("payment_date") @db.Timestamptz(6)
+  remark          String?   @map("remark") @db.VarChar(256)
+  createdAt       DateTime  @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @map("updated_at") @db.Timestamptz(6)
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(6)
+  voucherNo       String?   @map("voucher_no") @db.VarChar(255)
+
+  @@map("vouchers")
+}
