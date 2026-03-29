@@ -1,5 +1,15 @@
 export default () => ({
   port: parseInt(process.env.PORT || '', 10) || 3000,
+  cors: {
+    origins: (
+      process.env.CORS_ORIGINS ??
+      process.env.CORS_ORIGIN ??
+      'http://localhost:3000,https://voucher-ui-layout.onrender.com'
+    )
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean),
+  },
   database: {
     host: process.env.DATABASE_HOST,
     port: parseInt(process.env.DATABASE_PORT || '', 10) || 5432,

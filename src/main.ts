@@ -16,11 +16,32 @@ async function bootstrap() {
 
   app.useLogger(app.get(Logger));
 
+  // Get environment variables from custom configuration file
+  const configService = app.get(ConfigService);
+
   /**
    * Cross-origin resource sharing (CORS) is a mechanism that allows resources
    * to be requested from another domain.
    */
-  app.enableCors();
+  const allowedOrigins = configService.get<string[]>('cors.origins') ?? [];
+  app.enableCors({
+    origin: (origin, callback) => {
+      // Allow server-to-server calls and non-browser clients without an Origin header.
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error('Not allowed by CORS'), false);
+    },
+    credentials: true,
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+  });
 
   /**
    * To protect from some well-known web vulnerabilities by setting
@@ -144,8 +165,6 @@ async function bootstrap() {
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('docs', app, swaggerDocument);
 
-  // Get environment variables from custom configuration file
-  const configService = app.get(ConfigService);
   const port = configService.get<number>('port') || 3000;
 
   console.log('port :>> ', port);

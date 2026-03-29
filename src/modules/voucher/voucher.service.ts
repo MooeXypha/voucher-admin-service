@@ -39,6 +39,10 @@ export class VoucherService {
   }
 
   async findAll(query: QueryVoucherDto) {
+    const limit = Math.min(Math.max(query.limit ?? 10, 1), 100);
+    const offset = Math.max(query.offset ?? 0, 0);
+    const orderBy = query.orderby ?? { createdAt: 'desc' as const };
+
     let where: Prisma.VoucherWhereInput = { deletedAt: null };
     if (query?.search) {
       where = {
@@ -51,18 +55,22 @@ export class VoucherService {
         ],
       };
     }
-    const total = await this.prisma.voucher.count({ where });
-    const data = await this.prisma.voucher.findMany({
-      where,
-      take: query.limit,
-      skip: query.offset,
-      orderBy: query.orderby,
-    });
+
+    const [total, data] = await this.prisma.$transaction([
+      this.prisma.voucher.count({ where }),
+      this.prisma.voucher.findMany({
+        where,
+        take: limit,
+        skip: offset,
+        orderBy,
+      }),
+    ]);
+
     return {
       data,
       total,
-      offset: query.offset,
-      limit: query.limit,
+      offset,
+      limit,
     };
   }
 
