@@ -10,29 +10,31 @@ import { PrismaService } from './shared/prisma/prisma.service';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      // isGlobal: true,
-      // Cache environment variables
       cache: true,
-      // Load custom configuration file
       load: [configuration],
-      // Disable env variables loading in production from `.env` file
-      ignoreEnvFile: process.env.NODE_ENV === 'production' ? true : false,
+      ignoreEnvFile: process.env.NODE_ENV === 'production',
     }),
+
     LoggerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        pinoHttp: {
-          level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-          // Use `pino-pretty` for pretty-printing logs in development
-          // Use axiomhq/pino for structured logging in production
-          transport:
-            process.env.NODE_ENV === 'production'
+      useFactory: (configService: ConfigService) => {
+        const axiomToken = configService.get<string>('axiom.token');
+        const axiomDataset = configService.get<string>('axiom.dataset');
+
+        const useAxiom =
+          process.env.NODE_ENV === 'production' && axiomToken && axiomDataset;
+
+        return {
+          pinoHttp: {
+            level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+
+            transport: useAxiom
               ? {
                   target: '@axiomhq/pino',
                   options: {
-                    dataset: configService.get<string>('axiom.dataset'),
-                    token: configService.get<string>('axiom.token'),
+                    dataset: axiomDataset,
+                    token: axiomToken,
                   },
                 }
               : {
@@ -43,17 +45,16 @@ import { PrismaService } from './shared/prisma/prisma.service';
                     ignore: 'pid,hostname',
                   },
                 },
-        },
-      }),
+          },
+        };
+      },
     }),
 
     HealthModule,
-
-    // Resources
-
     PrismaModule,
     VoucherModule,
   ],
+
   providers: [PrismaService],
 })
 export class AppModule {}
