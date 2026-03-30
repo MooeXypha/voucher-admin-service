@@ -1,5 +1,9 @@
+// src/config/configuration.ts
 export default () => ({
+  // App port
   port: parseInt(process.env.PORT || '', 10) || 3000,
+
+  // CORS origins
   cors: {
     origins: (
       process.env.CORS_ORIGINS ??
@@ -10,10 +14,13 @@ export default () => ({
       .map((origin) => origin.trim())
       .filter(Boolean),
   },
+
+  // Database configuration
   database: {
-    host: process.env.DATABASE_HOST,
-    port: parseInt(process.env.DATABASE_PORT || '', 10) || 5432,
+    url: process.env.DATABASE_URL,
   },
+
+  // Elasticsearch (optional)
   elasticsearch: {
     node: process.env.ELASTICSEARCH_NODE || 'http://localhost:9200',
     auth: {
@@ -22,8 +29,10 @@ export default () => ({
     },
     index: process.env.ELASTICSEARCH_INDEX || 'app_logs',
   },
+
+  // Axiom (optional, only if token & dataset exist)
   axiom: {
-    dataset: process.env.AXIOM_DATASET,
-    token: process.env.AXIOM_TOKEN,
+    dataset: process.env.AXIOM_DATASET || null,
+    token: process.env.AXIOM_TOKEN || null,
   },
 });
