@@ -83,6 +83,8 @@ export class VoucherService {
 
   async findTotalIncomePerMonth() {
     const year = new Date().getFullYear();
+    const now = new Date();
+    const currentMonth = now.getMonth();
 
     const totals = await Promise.all(
       Array.from({ length: 12 }, async (_, i) => {
@@ -102,6 +104,13 @@ export class VoucherService {
       }),
     );
 
+    const currentTotal = totals[currentMonth];
+    const lastTotal = totals[currentMonth - 1] || 0;
+    const percent =
+      lastTotal === 0
+        ? 0
+        : Math.round(((currentTotal - lastTotal) / lastTotal) * 100);
+
     return {
       categories: [
         'Jan',
@@ -118,7 +127,8 @@ export class VoucherService {
         'Dec',
       ],
       series: totals.map((t) => Math.round(t / 10000)),
-      yearTotal: totals.reduce((sum, t) => sum + t, 0),
+      total: totals.reduce((sum, t) => sum + t, 0),
+      percent,
     };
   }
 
