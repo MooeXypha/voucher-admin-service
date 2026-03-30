@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Query,
@@ -27,18 +28,26 @@ export class VoucherController {
     return this.voucherService.findAll(query);
   }
 
+  @Get('total-income')
+  findTotalIncomePerMonth() {
+    return this.voucherService.findTotalIncomePerMonth();
+  }
+
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.voucherService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.voucherService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateVoucherDto: UpdateVoucherDto) {
-    return this.voucherService.update(+id, updateVoucherDto);
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateVoucherDto: UpdateVoucherDto,
+  ) {
+    return this.voucherService.update(id, updateVoucherDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.voucherService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.voucherService.remove(id);
   }
 }

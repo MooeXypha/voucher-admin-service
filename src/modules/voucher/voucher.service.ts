@@ -81,6 +81,47 @@ export class VoucherService {
     return voucher;
   }
 
+  async findTotalIncomePerMonth() {
+    const year = new Date().getFullYear();
+
+    const totals = await Promise.all(
+      Array.from({ length: 12 }, async (_, i) => {
+        const vouchers = await this.prisma.voucher.findMany({
+          where: {
+            paymentDate: {
+              gte: new Date(year, i, 1),
+              lte: new Date(year, i + 1, 0, 23, 59, 59, 999),
+            },
+          },
+          select: { amountPaid: true },
+        });
+        return vouchers.reduce(
+          (sum, v) => sum + (parseFloat(v.amountPaid) || 0),
+          0,
+        );
+      }),
+    );
+
+    return {
+      categories: [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ],
+      series: totals.map((t) => Math.round(t / 10000)),
+      yearTotal: totals.reduce((sum, t) => sum + t, 0),
+    };
+  }
+
   async update(id: number, data: UpdateVoucherDto): Promise<Voucher> {
     const existing = await this.prisma.voucher.findFirstOrThrow({
       where: { id, deletedAt: null },
