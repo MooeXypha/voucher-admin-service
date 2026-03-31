@@ -97,6 +97,7 @@ export class VoucherService {
           },
           select: { amountPaid: true },
         });
+
         return vouchers.reduce(
           (sum, v) => sum + (parseFloat(v.amountPaid) || 0),
           0,
@@ -106,6 +107,7 @@ export class VoucherService {
 
     const currentTotal = totals[currentMonth];
     const lastTotal = totals[currentMonth - 1] || 0;
+
     const percent =
       lastTotal === 0
         ? 0
@@ -126,8 +128,12 @@ export class VoucherService {
         'Nov',
         'Dec',
       ],
-      series: totals.map((t) => Math.round(t / 10000)),
+
+      // IMPORTANT FIX
+      series: totals.map((t) => Math.round(t)),
+
       total: totals.reduce((sum, t) => sum + t, 0),
+
       percent,
     };
   }
